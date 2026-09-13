@@ -1,7 +1,0 @@
-{
-  "functions": {
-    "api/action.py": {
-      "runtime": "python3.11"
-    }
-  }
-}
