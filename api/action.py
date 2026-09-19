@@ -68,24 +68,33 @@ def telegram_call(method, payload):
         pass
 
 
-def stop_tracking(asin):
+def get_item_id(item):
+    """Matches monitor.py / index.html's item-id logic: ASIN for Amazon
+    items, the stored 'id' field for Kohls and future non-Amazon items."""
+    marketplace = item.get("marketplace", "amazon")
+    if marketplace == "amazon":
+        return item.get("asin", "").upper()
+    return item.get("id", "")
+
+
+def stop_tracking(item_id):
     watchlist, sha = get_json_file("watchlist.json")
-    updated = [i for i in watchlist if i["asin"].upper() != asin.upper()]
+    updated = [i for i in watchlist if get_item_id(i).upper() != item_id.upper()]
     if len(updated) < len(watchlist):
-        put_json_file("watchlist.json", updated, sha, f"Stop tracking {asin} (instant action)")
+        put_json_file("watchlist.json", updated, sha, f"Stop tracking {item_id} (instant action)")
         return True
     return False
 
 
-def adjust_price(asin, new_price):
+def adjust_price(item_id, new_price):
     watchlist, sha = get_json_file("watchlist.json")
     found = False
     for item in watchlist:
-        if item["asin"].upper() == asin.upper():
+        if get_item_id(item).upper() == item_id.upper():
             item["max_price"] = new_price
             found = True
     if found:
-        put_json_file("watchlist.json", watchlist, sha, f"Adjust price for {asin} (instant action)")
+        put_json_file("watchlist.json", watchlist, sha, f"Adjust price for {item_id} (instant action)")
     return found
 
 
